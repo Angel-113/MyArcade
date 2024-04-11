@@ -114,6 +114,10 @@ static void RedirectVector(Ball *b) { /* Rotates by 45° degrees ball->speed vec
 
 }
 
+void Hit(Ball *b, Player *p) {
+
+}
+
 void MoveBall(Ball *b) {
     /* Check ball-wall collisions */
     if ( b->box.x == 0 || b->box.x == (float)GetScreenWidth() - b->box.width )
