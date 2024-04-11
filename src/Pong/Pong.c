@@ -14,7 +14,6 @@ static void InitGame(void) { /* Initializes all the game */
     AI_Player = InitPlayer((Vector2){(float)GetScreenWidth()/2 - 25, 30});
     P1 = InitPlayer((Vector2){(float)GetScreenWidth()/2 - 25, (float)GetScreenHeight() - 30});
     ball = InitBall();
-
 }
 
 static void CloseGame() { /* Free's memory used and Closes all game instances */
@@ -30,7 +29,7 @@ static void UpdateGame(void) {
     if ( (ball->speed.x == 0 && ball->speed.y == 0) && IsKeyPressed(KEY_ENTER) ) {
         int random = GetRandomValue(0, 1);
         if (random == 0) random = -1;
-        ball->speed = (Vector2) {0, (float)random*20};
+        ball->speed = (Vector2) {0, (float)random*10};
     }
 
     MovePlayer(P1);
