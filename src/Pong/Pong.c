@@ -27,9 +27,12 @@ static void CloseGame() { /* Free's memory used and Closes all game instances */
 static void UpdateGame(void) {
 
     if ( (ball->speed.x == 0 && ball->speed.y == 0) && IsKeyPressed(KEY_ENTER) ) {
+        /*
         int random = GetRandomValue(0, 1);
         if (random == 0) random = -1;
-        ball->speed = (Vector2) {0, (float)random*10};
+        ball->speed = (Vector2) {0, (float)random*20};
+        */
+        ball->speed = (Vector2){0, +20};
     }
 
     MovePlayer(P1);
@@ -59,8 +62,8 @@ void MainPong(void) { /* Main function for the game */
 /* ------------ Player Implementations ------------ */
 
 static float ControlPlayer(void) {
-    if (IsKeyDown(KEY_RIGHT)) return +30.0f;
-    else if (IsKeyDown(KEY_LEFT)) return -30.0f;
+    if (IsKeyDown(KEY_RIGHT)) return +20.0f;
+    else if (IsKeyDown(KEY_LEFT)) return -20.0f;
     return 0.0f;
 }
 
@@ -113,7 +116,7 @@ static void RedirectVector(Ball *b) { /* Rotates by 45° degrees ball->speed vec
 
 void MoveBall(Ball *b) {
     /* Check ball-wall collisions */
-    if ( b->box.x == 0 || b->box.x == (float)GetScreenWidth() )
+    if ( b->box.x == 0 || b->box.x == (float)GetScreenWidth() - b->box.width )
         NormalVector(b);
 
     /* Check ball-players collisions */
