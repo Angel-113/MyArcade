@@ -1,0 +1,21 @@
+# ninja log v5
+6064	6067	1711416361544377288	/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-subbuild/raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-configure	1267c4aece5f1f5
+0	6	1711416355484349161	raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-mkdir	2855583606224dea
+6074	6077	1711416361556377344	raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-done	2fbe034636af4e61
+6064	6067	1711416361544377288	raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-configure	1267c4aece5f1f5
+6	6059	1711416361536377251	/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-subbuild/raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-download	ddf1591cc750b0e6
+6074	6077	1711416361556377344	/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-subbuild/raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-done	2fbe034636af4e61
+6074	6077	1711416361556377344	CMakeFiles/raylib-populate-complete	2fbe034636af4e61
+6062	6064	1711416361544377288	/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-subbuild/raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-patch	cdb905f97fb84c38
+6074	6077	1711416361556377344	/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-subbuild/CMakeFiles/raylib-populate-complete	2fbe034636af4e61
+6059	6062	1711416361540377270	raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-update	47669d37d7fb7efc
+6071	6074	1711416361552377325	raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-test	d3fb771072c445ce
+6062	6064	1711416361544377288	raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-patch	cdb905f97fb84c38
+6067	6069	1711416361548377307	/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-subbuild/raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-build	dbc5d0ab289b5ee
+6	6059	1711416361536377251	raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-download	ddf1591cc750b0e6
+0	6	1711416355484349161	/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-subbuild/raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-mkdir	2855583606224dea
+6059	6062	1711416361540377270	/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-subbuild/raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-update	47669d37d7fb7efc
+6069	6071	1711416361552377325	/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-subbuild/raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-install	61631ffdee92f571
+6069	6071	1711416361552377325	raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-install	61631ffdee92f571
+6067	6069	1711416361548377307	raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-build	dbc5d0ab289b5ee
+6071	6074	1711416361552377325	/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-subbuild/raylib-populate-prefix/src/raylib-populate-stamp/raylib-populate-test	d3fb771072c445ce
