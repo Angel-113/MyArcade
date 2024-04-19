@@ -20,15 +20,5 @@ typedef struct Player {
 } Player;
 
 extern void MainPong(void);
-extern void Hit(Ball *b, Player *p);
-
-extern Ball *InitBall(void);
-extern void ChangeDirection(Ball *b);
-extern void MoveBall(Ball* b);
-extern void DeleteBall(Ball *b);
-
-extern Player *InitPlayer(Vector2 pos);
-extern void MovePlayer(Player *p);
-extern void DeletePlayer(Player *p);
 
 #endif //ARCADECONSOLE_PONG_H
