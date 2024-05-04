@@ -2,7 +2,7 @@
 #include "Snake/snake .h"
 
 int main(void) {
-    //MainSnake();
-    MainPong();
+    MainSnake();
+    //MainPong();
     return 0;
 }
