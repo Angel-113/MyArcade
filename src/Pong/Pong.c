@@ -29,6 +29,7 @@ static void DrawPlayer(Player *p); /* Draw player->box with color player->c */
 static Ball *InitBall(void);
 static void Hit(Player *p);
 static void MoveBall(void);
+static void DrawBall(void);
 static void ChangeDirection();
 static void DeleteBall(void);
 
@@ -36,6 +37,7 @@ static void DeleteBall(void);
 
 void InitGame(void) {
     InitWindow(1200, 720, "Pong");
+    SetTargetFPS(60);
     P1 = InitPlayer((Vector2){ (float)GetScreenWidth()/2, (float)GetScreenHeight() - 30 });
     AI_Player = InitPlayer((Vector2){(float)GetScreenWidth()/2, 30});
     ball = InitBall();
@@ -49,6 +51,7 @@ void UpdateGame(void) {
 void DrawGame(void) {
     BeginDrawing();
     ClearBackground(BLACK);
+    DrawBall();
     DrawPlayer(P1);
     DrawPlayer(AI_Player);
     EndDrawing();
@@ -95,6 +98,10 @@ void Hit(Player *p) {
         ChangeDirection();
 }
 
+void DrawBall(void) {
+    if (ball != (Ball *)NULL) DrawRectangleRec(ball->box, ball->c);
+}
+
 void MoveBall(void) {
     ball->box.x += ball->speed.x;
     ball->box.y += ball->speed.y;
@@ -122,8 +129,8 @@ Player *InitPlayer(Vector2 pos) {
 
 void MovePlayer(Player *p) {
     if (p != NULL) {
-        if (IsKeyDown(KEY_LEFT) && p->box.x > 0) p->box.x -= 20;
-        if (IsKeyDown(KEY_RIGHT) && p->box.width - p->box.x <= (float) GetScreenWidth()) p->box.x += 20;
+        if ( IsKeyDown(KEY_LEFT) && p->box.x > 0 ) p->box.x -= 20;
+        if ( IsKeyDown(KEY_RIGHT) && p->box.width - p->box.x < (float) GetScreenWidth() ) p->box.x += 20;
     }
 }
 
