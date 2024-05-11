@@ -30,5 +30,8 @@ add_executable(ArcadeConsole src/main.c
         "src/Snake/snake .c"
         "src/Snake/snake .h"
         src/Pong/Pong.c
-        src/Pong/Pong.h)
+        src/Pong/Pong.h
+        src/Conway/Conway.h
+        src/Conway/Conway.c
+)
 target_link_libraries(${PROJECT_NAME} raylib)
