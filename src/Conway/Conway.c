@@ -9,20 +9,20 @@ static int width = 0;
 static int height = 0;
 
 /* Some initialization definitions */
-static void InitGrid(void); /* Initializes a random grid of Cell */
-static void InitGame(void); /* Initializes everything necessary for the game  */
+static void InitGrid( void ); /* Initializes a random grid of Cell */
+static void InitGame( void ); /* Initializes everything necessary for the game  */
 
 /* Functions to do the game work */
+static void CopyGrid( Cell **M_c ); /* Copies original grid to work with it */
+static int CountNeighbors( int i , int j ); /* Count the amount of alive neighbors */
+static void DrawGGrid( void ); /* Draws the grid */
+static void GameOfLife( Cell **M_c ); /* Applies game of life rules to the copy grid */
 
-static void CopyGrid(Cell **M_c); /* Copies original grid to work with it */
-static int CountNeighbors(Cell **M, Cell **M_c, int i, int j); /* Count the amount of alive neighbors */
-static void GameOfLife(Cell **M_c); /* Applies game of life rules to the copy grid */
-
-void MainConway(void) {
+void MainConway( void ) {
     
 }
 
-void InitCell(void) {
+void InitCell( void ) {
     width = GetScreenWidth(); /* Get the screen width */
     height = GetScreenHeight(); /* Get the screen height */
 
@@ -49,13 +49,19 @@ void InitCell(void) {
     }
 }
 
-void InitGame(void) {
+void InitGame( void ) { /* Initializes window, set target frames per second and initializes cell */
     InitWindow(1280, 720, "Conway");
     SetTargetFPS(60);
     InitCell();
 }
 
-void CopyGrid(Cell **M_c) {
+void DrawGGrid( void ) { /* Draws the grid drawing each box in the grid on the screen */
+    for (int i = 0; i < width; i++)
+        for (int j = 0; j < height; j++)
+            DrawRectangleRec(M[i][j].box, M[i][j].c);
+}
+
+void CopyGrid( Cell **M_c ) { /* Copies each Cell of M to M_c */
     if (M_c == (Cell **)NULL) M_c = (Cell **) calloc(width, sizeof(Cell));
     for(int i = 0; i < width; i++) {
         M_c[i] = (Cell *) calloc(height, sizeof(Cell));
@@ -63,14 +69,13 @@ void CopyGrid(Cell **M_c) {
     }
 }
 
-int CountNeighbors(Cell **M, Cell **M_c, int i, int j) {
+int CountNeighbors( int i , int j ) { /* Given the indexes of a Cell (i, j) counts how much neighbors it has */
     int neighbors = 0;
-    if ( i  > 0 && j > 0 || i < width - 1 && j < height - 1) {
-        for ( int k = i - 1; k < i + 1; k++ ) {
-            for ( int t = k - 1; t < j + 1; t++ ) {
 
-            }
+    for (int k = i - 1; k < i + 1; k++)
+        for (int l = j - 1; l < j + 1; l++) {
+
         }
-    }
+
     return neighbors;
 }
