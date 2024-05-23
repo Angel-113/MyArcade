@@ -16,10 +16,21 @@ static void InitGame( void ); /* Initializes everything necessary for the game  
 static void CopyGrid( Cell **M_c ); /* Copies original grid to work with it */
 static int CountNeighbors( int i , int j ); /* Count the amount of alive neighbors */
 static void DrawGGrid( void ); /* Draws the grid */
+static void DrawGame( void );
 static void GameOfLife( Cell **M_c ); /* Applies game of life rules to the copy grid */
+static void CloseGame(void);
 
 void MainConway( void ) {
-    
+    InitGame();
+    while (!WindowShouldClose())
+        DrawGame();
+    CloseGame();
+}
+
+void DrawGame(void) {
+    BeginDrawing();
+    DrawGGrid();
+    EndDrawing();
 }
 
 void InitCell( void ) {
@@ -39,13 +50,13 @@ void InitCell( void ) {
         int j = 0;
         while (j < height) {
             M[i][j] = (Cell) {
-                    (Rectangle){(float)i, (float)j, 10, 10},
+                    (Rectangle){10*(float)i, 10*(float)j, 10, 10},
                     BLACK,
                     false
             };
-            j += 10;
+            j++;
         }
-        i += 10;
+        i++;
     }
 }
 
@@ -61,21 +72,8 @@ void DrawGGrid( void ) { /* Draws the grid drawing each box in the grid on the s
             DrawRectangleRec(M[i][j].box, M[i][j].c);
 }
 
-void CopyGrid( Cell **M_c ) { /* Copies each Cell of M to M_c */
-    if (M_c == (Cell **)NULL) M_c = (Cell **) calloc(width, sizeof(Cell));
-    for(int i = 0; i < width; i++) {
-        M_c[i] = (Cell *) calloc(height, sizeof(Cell));
-        for (int j = 0; j < height; j++) M_c[i][j] = M[i][j]; /* Copy grid cell by cell */
-    }
-}
-
-int CountNeighbors( int i , int j ) { /* Given the indexes of a Cell (i, j) counts how much neighbors it has */
-    int neighbors = 0;
-
-    for (int k = i - 1; k < i + 1; k++)
-        for (int l = j - 1; l < j + 1; l++) {
-
-        }
-
-    return neighbors;
+void CloseGame(void) {
+    for (int i = 0; i < width; i++) free((void *)M[i]);
+    free((void *)M);
+    CloseWindow();
 }
