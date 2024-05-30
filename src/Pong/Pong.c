@@ -36,7 +36,7 @@ static void DeleteBall(void);
 /* ----------------- */
 
 void InitGame(void) {
-    InitWindow(1200, 720, "Pong");
+    SetWindowTitle("Pong");
     SetTargetFPS(60);
     P1 = InitPlayer((Vector2){ (float)GetScreenWidth()/2, (float)GetScreenHeight() - 30 });
     AI_Player = InitPlayer((Vector2){(float)GetScreenWidth()/2, 30});
@@ -61,7 +61,6 @@ void CloseGame(void) {
     DeletePlayer(P1);
     DeletePlayer(AI_Player);
     DeleteBall();
-    CloseWindow();
 }
 
 void MainPong(void) { /* Main Function for Pong */

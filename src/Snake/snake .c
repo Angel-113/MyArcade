@@ -65,7 +65,8 @@ static void DrawGame( Snake *S, Apple *A ) { /* Draw all the game */
     }
 
     /* Draw points  */
-    char *msg_points = (char *)("Hola aqui van los puntos"); /* still don't figure out how to convert static ull points to char* */
+    char *msg_points = (char *) malloc(21 * sizeof(char));/* still don't figure out how to convert static ull points to char* */
+    sprintf(msg_points, "%llu", points);
     int measure = MeasureText(msg_points, 20);
     int xPos = GetScreenWidth() - measure;
     int yPos = 20;
@@ -74,12 +75,12 @@ static void DrawGame( Snake *S, Apple *A ) { /* Draw all the game */
     /* Draw apple */
     DrawRectangleRec(A->box, A->c);
     EndDrawing();
+    free(msg_points);
 }
 
 static void CloseGame(Snake *S, Apple *A) { /* Closes the game and free memory used  */
     SnakeDeath(S);
     DeleteApple(A);
-    CloseWindow();
 }
 
 static bool UpdateGame(Snake *S, Apple *A) { /* Update game variables */
@@ -93,7 +94,7 @@ static bool UpdateGame(Snake *S, Apple *A) { /* Update game variables */
 void MainSnake(void) {
     Snake *S = InitSnake();
     Apple *A = InitApple();
-    InitWindow(1200, 800, "Snake");
+    SetWindowTitle("Snake");
     SetTargetFPS(60);
 
     while ( !WindowShouldClose() ) {

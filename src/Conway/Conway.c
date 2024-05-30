@@ -61,7 +61,7 @@ void InitCell( void ) {
 }
 
 void InitGame( void ) { /* Initializes window, set target frames per second and initializes cell */
-    InitWindow(1280, 720, "Conway");
+    SetWindowTitle("Conway");
     SetTargetFPS(60);
     InitCell();
 }
@@ -75,5 +75,4 @@ void DrawGGrid( void ) { /* Draws the grid drawing each box in the grid on the s
 void CloseGame(void) {
     for (int i = 0; i < width; i++) free((void *)M[i]);
     free((void *)M);
-    CloseWindow();
 }
