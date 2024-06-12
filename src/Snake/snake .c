@@ -5,7 +5,7 @@ static unsigned long long int framesCounter = 0, points = 0;
 static void ControlPlayer(Snake *S) { /* Manages player input */
     if (IsKeyPressed(KEY_UP) && S->speed.y != 20) S->speed = (Vector2){0, -20};
     else if (IsKeyPressed(KEY_DOWN) && S->speed.y != -20) S->speed = (Vector2){0, +20};
-    if (IsKeyPressed(KEY_LEFT) && S->speed.x != 20) S->speed = (Vector2){-20, 0};
+    else if (IsKeyPressed(KEY_LEFT) && S->speed.x != 20) S->speed = (Vector2){-20, 0};
     else if (IsKeyPressed(KEY_RIGHT) && S->speed.x != -20) S->speed = (Vector2){+20, 0};
 }
 
@@ -207,7 +207,7 @@ Apple *InitApple(void) {
 
 void ReposApple(Apple *A) {
     A->box.x = (float)(20*(GetRandomValue(20, 1180)) % 1180);
-    A->box.y = (float)(20*(GetRandomValue(20, 780)) % 780);
+    A->box.y = (float)(20*(GetRandomValue(20, 700)) % 700);
 }
 
 void DeleteApple(Apple *A) {

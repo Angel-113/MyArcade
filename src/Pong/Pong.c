@@ -5,6 +5,7 @@
 static Player *AI_Player = NULL; /* Play Against AI */
 static Player *P1 = NULL; /* Main player */
 static Ball *ball = NULL; /* ball */
+static Vector2 InitialVelocity = { 0 };
 
 /* Game Definitions */
 
@@ -27,7 +28,6 @@ static void DrawPlayer(Player *p); /* Draw player->box with color player->c */
 /* Ball Definitions */
 
 static Ball *InitBall(void);
-static void Hit(Player *p);
 static void MoveBall(void);
 static void DrawBall(void);
 static void ChangeDirection();
@@ -50,7 +50,7 @@ void UpdateGame(void) {
 
 void DrawGame(void) {
     BeginDrawing();
-    ClearBackground(BLACK);
+    ClearBackground(GRAY);
     DrawBall();
     DrawPlayer(P1);
     DrawPlayer(AI_Player);
@@ -83,25 +83,37 @@ Ball *InitBall(void) {
             10
     };
     b->c = RAYWHITE;
-    b->speed = (Vector2){0, 0};
+    if (GetRandomValue(0, 1)) b->speed = (Vector2){0, +10};
+    else b->speed = (Vector2){0, -10};
+
+    InitialVelocity = b->speed;
     return b;
 }
 
 void ChangeDirection(void) {
-    ball->speed.x = 20 * cosf(PI/4);
-    ball->speed.y = 20 * sinf(PI/4);
+
+    Vector2 current_speed = (Vector2)ball->speed;
+
+    /* When ball pos is at screen borders */
+    if ( ball->box.x + 10 == (float)GetScreenWidth() ) ball->speed = Vector2Rotate(current_speed, -PI);
+    else if ( ball->box.x == 0 ) ball->speed = Vector2Rotate(ball->speed, -PI);
+
+    /* When ball collisions with any player */
+    if ( CheckCollisionRecs(ball->box, P1->box) || CheckCollisionRecs(ball->box, AI_Player->box) ) {
+        ball->speed = Vector2Rotate( ball->speed, - PI );
+    }
+
+    /* When ball goes beyond 0 or ScreenHeight */
+    if ( ball->box.y < 0 || ball->box.y > (float)GetScreenHeight() ) {
+
+    }
+
 }
 
-void Hit(Player *p) {
-    if (CheckCollisionRecs(p->box, ball->box))
-        ChangeDirection();
-}
-
-void DrawBall(void) {
-    if (ball != (Ball *)NULL) DrawRectangleRec(ball->box, ball->c);
-}
+void DrawBall(void) { if (ball != (Ball *)NULL) DrawRectangleRec(ball->box, ball->c); }
 
 void MoveBall(void) {
+    ChangeDirection();
     ball->box.x += ball->speed.x;
     ball->box.y += ball->speed.y;
 }
@@ -129,13 +141,11 @@ Player *InitPlayer(Vector2 pos) {
 void MovePlayer(Player *p) {
     if (p != NULL) {
         if ( IsKeyDown(KEY_LEFT) && p->box.x > 0 ) p->box.x -= 20;
-        if ( IsKeyDown(KEY_RIGHT) && p->box.width - p->box.x < (float) GetScreenWidth() ) p->box.x += 20;
+        if ( IsKeyDown(KEY_RIGHT) && p->box.x + 50 < (float) GetScreenWidth() ) p->box.x += 20;
     }
 }
 
-void DrawPlayer(Player *p) {
-    if (p != NULL) DrawRectangleRec(p->box, p->c);
-}
+void DrawPlayer(Player *p) { if (p != NULL) DrawRectangleRec(p->box, p->c); }
 
 void DeletePlayer(Player *p) {
     if (p != NULL) {

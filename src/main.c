@@ -34,7 +34,7 @@ static void InitMainGame(void) {
     for (int i = 0; i < n; i++)
         Buttons[i] = (Rectangle) {
         (float)GetScreenWidth()/2 - 100,
-        (float)(150* (i + 1)),
+        (float)(150 * (i + 1)),
         200,
         50
     };
@@ -49,13 +49,17 @@ static void ChooseGame(void) {
 
 static void DrawMainGame(void) {
     BeginDrawing();
+
     ClearBackground(RAYWHITE);
+
     DrawRectangleRec(Buttons[0], GREEN);
     DrawRectangleRec(Buttons[1], RED);
     DrawRectangleRec(Buttons[2], YELLOW);
+
     DrawText(string_1, Buttons[0].x, Buttons[0].y, 20, WHITE);
     DrawText(string_2, Buttons[1].x, Buttons[1].y, 20, WHITE);
     DrawText(string_3, Buttons[2].x, Buttons[2].y, 20, WHITE);
+
     EndDrawing();
 }
 
