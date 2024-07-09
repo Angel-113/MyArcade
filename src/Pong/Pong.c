@@ -13,6 +13,7 @@ static void InitGame(void); /* Initializes game */
 static void UpdateGame(void); /* Update game variables */
 static void DrawGame(void); /* Draw game variables state (one frame) */
 static void CloseGame(void); /* Free game variables and closes games */
+static void AllToInitialState (void);
 
 /* --------------------- */
 
@@ -30,8 +31,19 @@ static void DrawPlayer(Player *p); /* Draw player->box with color player->c */
 static Ball *InitBall(void);
 static void MoveBall(void);
 static void DrawBall(void);
-static void ChangeDirection();
+static void ChangeDirection(void);
+static void ReturnToCenter(void);
 static void DeleteBall(void);
+
+void MainPong(void) { /* Main Function for Pong */
+    InitGame(); 
+    while (!WindowShouldClose()) {
+        UpdateGame();
+        DrawGame();
+    }
+    CloseGame(); 
+}
+
 
 /* ----------------- */
 
@@ -63,13 +75,10 @@ void CloseGame(void) {
     DeleteBall();
 }
 
-void MainPong(void) { /* Main Function for Pong */
-    InitGame(); 
-    while (!WindowShouldClose()) {
-        UpdateGame();
-        DrawGame();
-    }
-    CloseGame(); 
+void AllToInitialState (void) {
+    P1->box.x = (float)GetScreenWidth()/2;
+    AI_Player->box.x = (float)GetScreenWidth()/2;
+    ReturnToCenter();
 }
 
 /* Ball Implementations */
@@ -105,7 +114,8 @@ void ChangeDirection(void) {
 
     /* When ball goes beyond 0 or ScreenHeight */
     if ( ball->box.y < 0 || ball->box.y > (float)GetScreenHeight() ) {
-
+        WaitTime(2);
+        AllToInitialState();
     }
 
 }
@@ -126,6 +136,11 @@ void DeleteBall(void) {
         free((void *)ball);
         ball = NULL;
     }
+}
+
+void ReturnToCenter (void) {
+    ball->box.x = (float)(GetScreenWidth() + 10) / 2;
+    ball->box.y = (float)(GetScreenHeight() + 10)/2;
 }
 
 /* --------------------------- */

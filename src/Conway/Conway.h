@@ -18,6 +18,6 @@ typedef struct Cell {
     bool state;
 } Cell;
 
-extern void MainConway(void); /* Main function for conway's game of life */
+extern void MainConway( void ); /* Main function for conway's game of life */
 
 #endif //ARCADECONSOLE_CONWAY_H

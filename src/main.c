@@ -50,7 +50,7 @@ static void ChooseGame(void) {
 static void DrawMainGame(void) {
     BeginDrawing();
 
-    ClearBackground(RAYWHITE);
+    ClearBackground(BLACK);
 
     DrawRectangleRec(Buttons[0], GREEN);
     DrawRectangleRec(Buttons[1], RED);

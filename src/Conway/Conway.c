@@ -1,150 +1,108 @@
-//
-// Created by angel on 8/05/24.
-//
-
 #include "Conway.h"
 
-static Cell **M = (Cell **) NULL;
-static Cell **M1 = (Cell **) NULL;
-static short int height = 0;
-static short int width = 0;
+static int **M = NULL;
+static int **M1 = NULL;
+static int height = 0;
+static int width = 0;
+static const int square_size = 9;
 
-static void InitGame( void ); /* Initialization of game */
-static void UpdateGame( void ); /* Updates variable state */
-static void DrawGame( void ); /* Draw game variables */
-static void CloseGame( void ); /* Close game instances */
+static void InitGame ( void );
+static void UpdateGame ( void );
+static void DrawGame ( void );
+static void CloseGame ( void );
 
-static int CountNeighbors( int i, int j ); /* Count the amount of alive neighbors around M[i][j] */
-static void GameOfLife( int n, int i, int j ); /* Applies the game of life rules to M[i][j] and the result is M1[i][j] */
-static void ChangeGrid ( void ); /* Changes the grids */
-
-void MainConway( void ) { /* Main function for the game */
+void MainConway ( void ) {
     InitGame();
-    while ( !WindowShouldClose() ) {
+    while (!WindowShouldClose()) {
         UpdateGame();
         DrawGame();
     }
     CloseGame();
 }
 
-void InitGame( void ) {
-
-    height = (short int)( GetScreenHeight() / 10 );
-    width = (short int)( GetScreenWidth() / 10 );
-
-    SetWindowTitle("Game of Life");
+static void InitGame ( void ) {
     SetTargetFPS(60);
 
-    M = (Cell **) malloc( width * sizeof(Cell) );
-    M1 = (Cell **) malloc( width * sizeof(Cell) );
+    height = GetScreenHeight() / square_size;
+    width = GetScreenWidth() / square_size;
 
-    for ( int i = 0; i < width; i++ ) {
+    M = (int **) malloc(height * sizeof(int *));
+    M1 = (int **) malloc(height * sizeof(int *));
 
-        M[i] = (Cell *) malloc( height * sizeof(Cell) );
-        M1[i] = (Cell *) malloc( height * sizeof(Cell) );
+    if (!M || !M1) {
+        CloseWindow();
+        exit(1);
+    }
 
-        for ( int j = 0; j < height; j++ ) {
-
-            Color C = BLACK;
-            bool alive = false;
-            if ( GetRandomValue(0, 1) ) {
-                C = RAYWHITE;
-                alive = true;
-            }
-
-            M[i][j] = (Cell) {
-                    (Rectangle) {
-                        10*(float)i,
-                        10*(float)j,
-                        10,
-                        10
-                        },
-                    C,
-                    alive
-            };
-            M1[i][j] = M[i][j];
-
+    for (int i = 0; i < height; i++) {
+        M[i] = (int *)malloc(width * sizeof(int));
+        M1[i] = (int *)malloc(width * sizeof(int));
+        if (!M[i] || !M1[i]) {
+            CloseWindow();
+            exit(1);
         }
-
-    }
-
-}
-
-void UpdateGame( void ) {
-    if ( M != NULL && M1 != NULL ) {
-        /* Here update game variables */
-        for ( int i = 0; i < width; i++ )
-            for ( int j = 0; j < height; j++ )
-                GameOfLife( CountNeighbors(i, j), i, j );
-        ChangeGrid();
-        WaitTime(0.5);
-    }
-    else {
-        perror("Error when updating game variables !!! \n");
-        exit(EXIT_FAILURE);
+        for (int j = 0; j < width; j++) {
+            M[i][j] = GetRandomValue(0, 1);
+            M1[i][j] = M[i][j];
+        }
     }
 }
 
-void DrawGame( void ) {
+void CopyGrid ( void ) { for ( int i = 0; i < height; i++ ) strncpy((void *)M[i], (void *)M1[i], sizeof(int)); }
+
+int CountNeighbors ( int i, int j ) {
+    int alive_neighbors = 0;
+    if (i == 0) i = height - 1;
+    if (j == 0) j = width - 1;
+
+    for (int l = i - 1; l <= i + 1; l++) {
+        for (int k = j - 1; k <= j + 1; k++) {
+            if (l == i && k == j) continue;
+            int current_i = (l + i) % height;
+            int current_j = (k + j) % width;
+            if (M[current_i][current_j]) alive_neighbors++;
+        }
+    }
+    return alive_neighbors;
+}
+
+static void UpdateGame ( void ) {
+    for ( int i = 0; i < height; i++ ) {
+        for ( int j = 0; j < width; j++ ) {
+            int alive_neighbors = CountNeighbors(i, j);
+            if (M[i][j] && (alive_neighbors > 3 || alive_neighbors < 2)) M1[i][j] = 0;
+            if (!M[i][j] && (alive_neighbors == 3)) M1[i][j] = 1;
+        }
+    }
+    CopyGrid();
+}
+
+static void DrawGame ( void ) {
     BeginDrawing();
-    if (M != NULL && M1 != NULL) {
-        for (int i = 0; i < width; i++)
-            for (int j = 0; j < height; j++) {
-                DrawRectangleRec(M[i][j].box, M[i][j].c);
-                DrawRectangleLinesEx(M[i][j].box, 1.0f, GRAY);
-            }
-    } else {
-        perror("Error when drawing the game !!! \n");
-        exit(EXIT_FAILURE);
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            Color c = (M[i][j] == 0) ? BLACK : RAYWHITE;
+            Rectangle R = (Rectangle) {
+                (float) (square_size * j),
+                (float) (square_size * i),
+                (float) square_size,
+                (float) square_size
+            };
+            DrawRectangleRec(R, c);
+            DrawRectangleLinesEx(R, 1, GRAY);
+        }
     }
     EndDrawing();
+    WaitTime(0.5);
 }
 
-void CloseGame( void ) {
-    for ( int i = 0; i < width; i++ ) {
-        for ( int j = 0; j < height; j++ ) {
-            M[i][j] = (Cell) { 0 };
-            M1[i][j] = (Cell) { 0 };
-        }
-        free( (void *) M[i] );
-        free( (void *) M1[i] );
+static void CloseGame ( void ) {
+    for ( int i = 0; i < height; i++ ) {
+            free(M[i]);
+            free(M1[i]);
     }
-    free( (void *) M );
-    free( (void *) M1 );
-}
-
-void ChangeGrid( void ) {
-    static Cell **Aux = (Cell **) NULL;
-    Aux = M;
-    M = M1;
-    M1 = Aux;
-}
-
-void GameOfLife(int n, int i, int j) {
-
-    if ( M[i][j].state && ( n < 2 || n > 3 ) ) {
-        M1[i][j].state = false;
-        M1[i][j].c = BLACK;
-    }
-    else if ( !M[i][j].state && ( n == 3 ) ) {
-        M1[i][j].state = true;
-        M1[i][j].c = RAYWHITE;
-    }
-
-}
-
-int CountNeighbors(int i, int j) {
-    int neighbors = 0;
-
-    for ( int ci = i - 1; ci < i + 1; ci++ ) {
-        int current_i = (int) (ci + i) % width;
-
-        for ( int cj = j - 1; cj < j + 1; cj++ ) {
-            if ( ci == i && cj == j ) continue;
-            int current_j = (int) (cj + j) % height;
-            if ( M[current_i][current_j].state ) neighbors++;
-        }
-    }
-
-    return neighbors;
+    free(M);
+    free(M1);
+    M = NULL;
+    M1 = NULL;
 }
