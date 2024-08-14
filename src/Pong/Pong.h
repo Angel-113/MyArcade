@@ -7,6 +7,7 @@
 #include "raymath.h"
 #include "../Arena/Arena.h"
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 
 typedef struct Ball {
