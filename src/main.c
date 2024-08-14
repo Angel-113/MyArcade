@@ -5,9 +5,9 @@
 Rectangle *Buttons = NULL;
 int n = 3;
 
-const char *string_1 = "Snake";
-const char *string_2 = "Pong";
-const char *string_3 = "Game of Life";  
+static const char *string_1 = "Snake";
+static const char *string_2 = "Pong";
+static const char *string_3 = "Game of Life";
 
 static void InitMainGame(void);
 static void DrawMainGame(void);
@@ -40,11 +40,11 @@ static void InitMainGame(void) {
     };
 }
 
-static void ChooseGame(void) {
+static void ChooseGame(void) { /* Commented by now ( 04/08/2024 ) while see how to add some self developed libraries into this project */
     Vector2 Mouse = (Vector2) GetMousePosition();
     if (CheckCollisionPointRec(Mouse, Buttons[0]) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) MainSnake();
     else if (CheckCollisionPointRec(Mouse, Buttons[1]) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) MainPong();
-    else if (CheckCollisionPointRec(Mouse, Buttons[2]) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) MainConway();
+    //else if (CheckCollisionPointRec(Mouse, Buttons[2]) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) MainConway();
 }
 
 static void DrawMainGame(void) {

@@ -6,7 +6,6 @@
 #define ARCADECONSOLE_CONWAY_H
 
 #include "raylib.h"
-#include "raymath.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

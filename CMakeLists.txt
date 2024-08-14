@@ -7,6 +7,7 @@ set(CMAKE_C_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Dependencies
+# All this is to check if there's some Raylib version on your computer and if not, download it and build it
 set(RAYLIB_VERSION 5.0)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
 if (NOT raylib_FOUND) # If there's none, fetch and build raylib
@@ -33,5 +34,8 @@ add_executable(ArcadeConsole src/main.c
         src/Pong/Pong.h
         src/Conway/Conway.h
         src/Conway/Conway.c
+        src/Arena/Arena.h
+        src/Arena/Arena.c
 )
+
 target_link_libraries(${PROJECT_NAME} raylib)

@@ -1,151 +1,167 @@
 #include "snake .h"
 
-static unsigned long long int framesCounter = 0, points = 0;
+static Arena* memory_pool = (Arena *) NULL;
+static Apple* apple = (Apple *) NULL;
+static NodeSnake* snake = (NodeSnake *) NULL;
+static Vector2 direction = (Vector2){ 0 };
+static unsigned short int size = 0;
+static bool alive = true;
+static unsigned long long int points = 0;
 
-static void ControlPlayer(Snake *S) { /* Manages player input */
-    if (IsKeyPressed(KEY_UP) && S->speed.y != 20) S->speed = (Vector2){0, -20};
-    else if (IsKeyPressed(KEY_DOWN) && S->speed.y != -20) S->speed = (Vector2){0, +20};
-    else if (IsKeyPressed(KEY_LEFT) && S->speed.x != 20) S->speed = (Vector2){-20, 0};
-    else if (IsKeyPressed(KEY_RIGHT) && S->speed.x != -20) S->speed = (Vector2){+20, 0};
-}
+static void InitGame ( void );
+static void UpdateGame ( void );
+static void DrawGame ( void );
+static void CloseGame ( void );
 
-static int SetDifficulty(unsigned long long int p) { /* Increases speed of Snake */
-    int k = 0;
-    if (p < 1000) k = 6;
-    else if (p < 1500) k = 5;
-    else if (p < 1700) k = 4;
-    else if (p < 2500) k = 3;
-    else k = 2;
-    return k;
-}
+static void InitNode ( NodeSnake* n, float x, float y );
+static float SetDifficulty ( void );
+static void SwitchDirection ( void );
+static void SnakeDeath ( void );
+static void SnakeCollision ( void );  /* Only with walls or itself */
+static void MoveSnake ( void );
+static void Eat ( void );
+static void ReallocApple ( void );
 
-static bool HeadCollisions(Snake *S, Apple *A) { /* Returns true if head collision with wall or self */
-    /* Collision with apple */
-    if (CheckCollisionRecs(S->head->box, A->box)) {
-        Eat(S); /* Grow Snake */
-        ReposApple(A); /* Repos apple Object */
-        return false;
+static void DrawSnake ( void );
+static void DrawApple ( void );
+
+void MainSnake ( void ) {
+    InitGame();
+    while ( !WindowShouldClose() && alive ) {
+        UpdateGame();
+        DrawGame();
     }
-
-    /* Check wall collision */
-    if ( S->head->box.y < 0 || S->head->box.y > (float)GetScreenHeight() ) return true;
-    if ( S->head->box.x < 0 || S->head->box.x > (float)GetScreenWidth() ) return true;
-
-    /* Check with self collision */
-    NodeSnake *current = S->head->next;
-    while (current != NULL) {
-        if (current->box.x == S->head->box.x && current->box.y == S->head->box.y)
-            return true;
-        current = current->next;
-    }
-
-    return false;
+    CloseGame();
 }
 
-static void KillSnake( Snake *S ) { /* Stops snake and Draw a message */
-    S->speed = (Vector2){0,0};
-    const char *msg = "You Lost";
-    BeginDrawing();
-    int measure = MeasureText(msg, 50);
-    int xPos = (GetScreenWidth()  -  measure)/2;
-    DrawText(msg, xPos, GetScreenHeight()/2 - 50, 50, RED);
-    EndDrawing();
-    WaitTime(5);
-}
-
-static void DrawGame( Snake *S, Apple *A ) { /* Draw all the game */
-    BeginDrawing();
-    ClearBackground((Color){225, 198, 153, 255});
-
-    /* Draw complete snake */
-    NodeSnake *current = S->head;
-    while (current != NULL) {
-        DrawRectangleRec(current->box, current->c);
-        current = current->next;
-    }
-
-    /* Draw points  */
-    char *msg_points = (char *) malloc(21 * sizeof(char));/* still don't figure out how to convert static ull points to char* */
-    sprintf(msg_points, "%llu", points);
-    int measure = MeasureText(msg_points, 20);
-    int xPos = GetScreenWidth() - measure;
-    int yPos = 20;
-    DrawText(msg_points, xPos - 20, yPos, 20, (Color){0, 0, 0, 150});
-
-    /* Draw apple */
-    DrawRectangleRec(A->box, A->c);
-    EndDrawing();
-    free(msg_points);
-}
-
-static void CloseGame(Snake *S, Apple *A) { /* Closes the game and free memory used  */
-    SnakeDeath(S);
-    DeleteApple(A);
-}
-
-static bool UpdateGame(Snake *S, Apple *A) { /* Update game variables */
-    if (framesCounter == ULLONG_MAX) framesCounter = 0;
-    if (points == ULLONG_MAX) points = 0;
-    Move(S);
-    return HeadCollisions(S, A);
-}
-
-/* Main Method for the game */
-void MainSnake(void) {
-    Snake *S = InitSnake();
-    Apple *A = InitApple();
+void InitGame ( void ) {
     SetWindowTitle("Snake");
-    SetTargetFPS(60);
+    memory_pool = CreateArena( MAX_SIZE * sizeof(NodeSnake) + sizeof(Apple) );
+    apple = ArenaAlloc(memory_pool, sizeof(Apple));
+    snake = ArenaAlloc(memory_pool, sizeof(NodeSnake));
 
-    while ( !WindowShouldClose() ) {
-        if (UpdateGame(S, A)) {
-            KillSnake(S);
+    *apple = (Apple) {
+            (Rectangle) {
+                    (float)GetScreenWidth()/2,
+                    (float)GetScreenHeight()/2,
+                15.0f,
+                15.0f
+            },
+            RED
+    };
+    InitNode(snake, 0, 0);
+}
+
+void UpdateGame ( void ) {
+    SwitchDirection();
+    MoveSnake();
+    SnakeCollision();
+    Eat();
+}
+
+void DrawGame ( void ) {
+    char points_txt[21];
+    sprintf(points_txt, "%llu", points);
+    int width = MeasureText(points_txt, 20);
+    BeginDrawing();
+    ClearBackground( (Color) { 245, 245, 220, 255 } );
+    DrawText(points_txt, GetScreenWidth() - 2*width, 30, 20, GRAY);
+    DrawSnake();
+    DrawApple();
+    EndDrawing();
+}
+
+void CloseGame ( void ) {
+    DestroyArena(memory_pool);
+    memory_pool = NULL;
+    apple = NULL;
+    snake = NULL;
+    size = 0;
+    points = 0;
+    alive = true;
+    direction = (Vector2) {0};
+}
+
+static void InitNode ( NodeSnake* n, float x, float y ) {
+    n->box = (Rectangle) {
+        x,
+        y,
+        15.0f,
+        15.0f,
+    };
+    n->next = NULL;
+    n->c = GREEN;
+}
+
+static void SwitchDirection ( void ) {
+    switch (GetKeyPressed()) {
+        default:
             break;
+        case KEY_LEFT:
+            if ( direction.x != +15 ) direction = (Vector2) { -15, 0 };
+            break;
+        case KEY_RIGHT:
+            if ( direction.x != -15 ) direction = (Vector2) { +15, 0 };
+            break;
+        case KEY_UP:
+            if ( direction.y != +15 ) direction = (Vector2) { 0, -15 };
+            break;
+        case KEY_DOWN:
+            if ( direction.y != -15 ) direction = (Vector2) { 0, +15 };
+            break;
+    }
+}
+
+static void SnakeCollision ( void ) {
+    if (snake != NULL) {
+        /* Check Collision with its body */
+        NodeSnake *current = snake->next;
+        while (current != NULL) {
+            if (CheckCollisionRecs(snake->box, current->box)) {
+                SnakeDeath();
+                return;
+            }
+            current = current->next;
         }
-        DrawGame(S, A);
+        /* Check Collision with walls */
+        if ( snake->box.y < 0 || snake->box.y + 15.0f > GetScreenHeight() || snake->box.x < 0 ||
+            snake->box.x + 15.0f > GetScreenWidth() )
+            SnakeDeath();
     }
-
-    CloseGame(S, A);
 }
 
-/* ========== Snake Implementations ========== */
-
-Snake *InitSnake(void) {
-    Snake *S = (Snake *)malloc(sizeof(Snake));
-    S->head = InitNode(0, 0, 20, 20);
-    S->speed = (Vector2){0, 0};
-    S->size = 1;
-    return S;
+static void SnakeDeath ( void ) {
+    direction = (Vector2) {0, 0};
+    char* text = "You Lose";
+    int width = MeasureText(text, 30);
+    BeginDrawing();
+    DrawText(text, (GetScreenWidth() - width) / 2, (GetScreenHeight() - 30)/2, 30, RED);
+    EndDrawing();
+    WaitTime(3);
+    alive = false; /* May add an option to restart the game */
 }
 
-void SnakeDeath(Snake *s) {
-    NodeSnake *current = s->head;
-    while ( current != NULL ) {
-        NodeSnake *aux = current->next;
-        DeleteNode(current);
-        current = aux;
-    }
-    s->head = NULL;
-    s->size = 0;
-    free((void *)s);
-    s = NULL;
+static float SetDifficulty ( void ) {
+    if ( points < 500 ) return 1.0f;
+    else if ( points > 500 && points < 1000 ) return 1.0001f;
+    else if ( points > 1000 && points < 1500 ) return 1.001f;
+    return 1.1f;
 }
 
-void Move(Snake *S) {
-    ControlPlayer(S);
-    Vector2 pre = (Vector2){};
-    Vector2 aux = (Vector2){};
+static void MoveSnake ( void ) {
+    if ( snake != NULL ) {
 
-    if (framesCounter % SetDifficulty(points) == 0) {
-        /* Head movement */
-        pre.x = S->head->box.x;
-        pre.y = S->head->box.y;
+        Vector2 pre = (Vector2) { 0 };
+        Vector2 aux = (Vector2) { 0 };
 
-        S->head->box.x += S->speed.x;
-        S->head->box.y += S->speed.y;
+        pre.x = snake->box.x;
+        pre.y = snake->box.y;
 
-        /* Chase the head with the body */
-        NodeSnake *current = S->head->next;
+        snake->box.x += SetDifficulty()*direction.x;
+        snake->box.y += SetDifficulty()*direction.y;
+
+        NodeSnake* current = snake->next;
+
         while ( current != NULL ) {
             aux.x = current->box.x;
             aux.y = current->box.y;
@@ -156,64 +172,36 @@ void Move(Snake *S) {
             pre = aux;
             current = current->next;
         }
+
     }
-
-    framesCounter++;
 }
 
-void Eat(Snake *s) {
-    if (s->size < MAX_SIZE) {
-        Vector2 NewNodePos = (Vector2) {s->head->box.x - s->speed.x,
-                                        s->head->box.y - s->speed.y};
-        NodeSnake *new = InitNode(NewNodePos.x, NewNodePos.y,
-                                  20, 20);
-        new->next = s->head->next;
-        s->head->next = new;
-        s->size++;
+static void Eat ( void ) {
+    if ( snake != NULL && CheckCollisionRecs(snake->box, apple->box) && size <= MAX_SIZE ) {
+        NodeSnake* new = ArenaAlloc(memory_pool, sizeof(NodeSnake));
+        InitNode(new, snake->box.x - direction.x, snake->box.y - direction.y);
+        new->next = snake->next;
+        snake->next = new;
+        points += points < MAX_POINTS ? 100 : 0;
+        ReallocApple();
+        size++;
     }
-    points += 100;
 }
 
-/* =========================================== */
-
-/* ============ Node implementations ========== */
-
-NodeSnake *InitNode(float x, float y, float width, float height) {
-    NodeSnake *n = (NodeSnake *)malloc(sizeof(NodeSnake));
-    n->box = (Rectangle) {x, y, width, height};
-    n->c = (Color){108, 187, 60, 255}; /* Snake's green */
-    n->next = NULL;
-    return n;
+static void ReallocApple ( void ) {
+    apple->box.x = (float)GetRandomValue( 10, 1270 );
+    apple->box.y = (float)GetRandomValue( 10, 710 );
 }
 
-void DeleteNode(NodeSnake *n) {
-    n->box = (Rectangle){0, 0, 0, 0};
-    free((void *)n);
-    n = NULL;
+static void DrawApple ( void ) {
+    if (apple != NULL)
+        DrawRectangleRec(apple->box, apple->c);
 }
 
-/* =========================================== */
-
-/* =============== Apple Implementations ============== */
-
-Apple *InitApple(void) {
-    Apple *A = (Apple *) malloc(sizeof(Apple));
-    A->box = (Rectangle) {(float)(20*(GetRandomValue(20, 1180)) % 1180),
-                          (float)(20*(GetRandomValue(20, 780)) % 780),
-                          20, 20};
-    A->c = (Color){199, 55, 47, 255};
-    return A;
+static void DrawSnake ( void ) {
+    NodeSnake* aux = snake;
+    while ( aux != NULL ) {
+        DrawRectangleRec(aux->box, aux->c);
+        aux = aux->next;
+    }
 }
-
-void ReposApple(Apple *A) {
-    A->box.x = (float)(20*(GetRandomValue(20, 1180)) % 1180);
-    A->box.y = (float)(20*(GetRandomValue(20, 700)) % 700);
-}
-
-void DeleteApple(Apple *A) {
-    A->box = (Rectangle){0, 0, 0, 0};
-    free((void *)A);
-    A = NULL;
-}
-
-/* ==================================================== */

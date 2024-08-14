@@ -5,11 +5,12 @@
 
 #include "raylib.h"
 #include "raymath.h"
+#include "../Arena/Arena.h"
 #include <stdlib.h>
 #include <string.h>
 
 typedef struct Ball {
-    Rectangle box;
+    Vector2 pos;
     Vector2 speed;
     Color c;
 } Ball;

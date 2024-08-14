@@ -2,171 +2,178 @@
 
 #include "Pong.h"
 
-static Player *AI_Player = NULL; /* Play Against AI */
-static Player *P1 = NULL; /* Main player */
-static Ball *ball = NULL; /* ball */
-static Vector2 InitialVelocity = { 0 };
+#define BALL_SIZE 10
 
-/* Game Definitions */
+static Arena* memory_pool = NULL;
+static Player* P1 = NULL;
+static Player* AI = NULL;
+static Ball* B = NULL;
 
-static void InitGame(void); /* Initializes game */
-static void UpdateGame(void); /* Update game variables */
-static void DrawGame(void); /* Draw game variables state (one frame) */
-static void CloseGame(void); /* Free game variables and closes games */
-static void AllToInitialState (void);
+static Vector2 Pd = {0};
+static Vector2 AId = {0};
 
-/* --------------------- */
+static unsigned char points_p1 = 0;
+static unsigned char points_ai = 0;
 
-/* Player Definitions */
+static float deltaTime = 0;
 
-static Player *InitPlayer(Vector2 pos); /* Malloc player instance with position pos */
-static void DeletePlayer(Player *p); /* Free's player instance */
-static void MovePlayer(Player *p); /* Move player->box */
-static void DrawPlayer(Player *p); /* Draw player->box with color player->c */
+static void InitGame ( void );
+static void UpdateGame ( void );
+static void DrawGame ( void );
+static void CloseGame ( void );
 
-/* ----------------------- */
+static void ReallocBall ( void );
+static void MoveBall ( void );
+static void BallCollision ( void );
 
-/* Ball Definitions */
+static void PlayerBallCollision ( Player *p );
 
-static Ball *InitBall(void);
-static void MoveBall(void);
-static void DrawBall(void);
-static void ChangeDirection(void);
-static void ReturnToCenter(void);
-static void DeleteBall(void);
-
-void MainPong(void) { /* Main Function for Pong */
-    InitGame(); 
-    while (!WindowShouldClose()) {
+void MainPong ( void ) {
+    InitGame();
+    while ( !WindowShouldClose() ) {
         UpdateGame();
         DrawGame();
     }
-    CloseGame(); 
+    CloseGame();
 }
 
+static void InitGame ( void ) {
 
-/* ----------------- */
-
-void InitGame(void) {
-    SetWindowTitle("Pong");
     SetTargetFPS(60);
-    P1 = InitPlayer((Vector2){ (float)GetScreenWidth()/2, (float)GetScreenHeight() - 30 });
-    AI_Player = InitPlayer((Vector2){(float)GetScreenWidth()/2, 30});
-    ball = InitBall();
+    SetWindowTitle("Pong");
+    memory_pool = CreateArena( 2*sizeof(Player) + sizeof(Ball) );
+
+    P1 = ArenaAlloc(memory_pool, sizeof(Player));
+    AI = ArenaAlloc(memory_pool, sizeof(Player));
+    B = ArenaAlloc(memory_pool, sizeof(Ball));
+
+    *P1 = (Player) {
+            (Rectangle) {
+                    20,
+                    (float)GetScreenHeight()/2 - 40,
+                    10,
+                    80
+            },
+            RAYWHITE
+    };
+
+    *AI = (Player) {
+            (Rectangle) {
+                    (float)GetScreenWidth() - 20,
+                    (float)GetScreenHeight()/2 - 40,
+                    10,
+                    80
+            },
+            RAYWHITE
+    };
+
+    *B = (Ball) {
+            (Vector2) { (float) GetScreenWidth()/2 , (float) GetScreenHeight()/2  },
+            (Vector2) { GetRandomValue(0, 1) == 0 ? -10 : 10, 0 },
+            RAYWHITE
+    };
+
 }
 
-void UpdateGame(void) {
+static void UpdateGame ( void ) {
     MoveBall();
-    MovePlayer(P1);
+    BallCollision();
 }
 
-void DrawGame(void) {
+static void DrawGame ( void ) {
+    char txt1[4], txt2[4];
+    sprintf(txt1, "%u", points_p1);
+    sprintf(txt2, "%u", points_ai);
+
     BeginDrawing();
-    ClearBackground(GRAY);
-    DrawBall();
-    DrawPlayer(P1);
-    DrawPlayer(AI_Player);
+
+    ClearBackground(BLACK);
+
+    DrawText(txt1, MeasureText(txt1, 30), 40, 30, GRAY);
+    DrawText(txt2, GetScreenWidth() - 2*MeasureText(txt2, 30), 40, 30, GRAY);
+    DrawLine(GetScreenWidth()/2, 0, GetScreenWidth()/2, GetScreenHeight(), GRAY);
+    DrawCircle((int)B->pos.x, (int)B->pos.y, BALL_SIZE, B->c);
+    DrawRectangleRec(P1->box, P1->c);
+    DrawRectangleRec(AI->box, AI->c);
+
     EndDrawing();
 }
 
-void CloseGame(void) {
-    DeletePlayer(P1);
-    DeletePlayer(AI_Player);
-    DeleteBall();
+static void CloseGame ( void ) {
+    DestroyArena(memory_pool);
+    memory_pool = NULL;
+    P1 = NULL;
+    AI = NULL;
+    B = NULL;
+    points_ai = 0;
+    points_p1 = 0;
 }
 
-void AllToInitialState (void) {
-    P1->box.x = (float)GetScreenWidth()/2;
-    AI_Player->box.x = (float)GetScreenWidth()/2;
-    ReturnToCenter();
+static void ReallocBall ( void ) { B->pos = (Vector2) { (float)GetScreenWidth()/2, (float)GetScreenHeight()/2 }; }
+
+static void MoveBall ( void ) {
+    B->pos.x += B->speed.x;
+    B->pos.y += B->speed.y;
 }
 
-/* Ball Implementations */
+/*
+ * The physics in pong game are simple:
+ *
+ * - if a player hits the ball at the top corner (or near it)
+ * then it should bounce off towards our top border
+ *
+ * - if a player hits the ball at the bottom corner (or near it)
+ * then it should bounce off towards our bottom border
+ *
+ * - if a player hits the ball at the center
+ * then it should bounce off towards the right and not up or
+ * down at all.
+ *
+*/
 
-Ball *InitBall(void) {
-    Ball *b = (Ball *)malloc(sizeof(Ball));
-    b->box = (Rectangle) {
-            (float)GetScreenWidth()/2,
-            (float)GetScreenHeight()/2,
-            10,
-            10
-    };
-    b->c = RAYWHITE;
-    if (GetRandomValue(0, 1)) b->speed = (Vector2){0, +10};
-    else b->speed = (Vector2){0, -10};
+static void BallCollision ( void ) {
 
-    InitialVelocity = b->speed;
-    return b;
-}
+    Rectangle top, bottom;
+    top = (Rectangle) { 0, 1, (float)GetScreenWidth(), 1 };
+    bottom = (Rectangle) { 0, (float)GetScreenHeight(), (float)GetScreenWidth(), 1 };
 
-void ChangeDirection(void) {
+    B->speed =  CheckCollisionCircleRec(B->pos, BALL_SIZE, top) || CheckCollisionCircleRec(B->pos, BALL_SIZE, bottom) ? Vector2Rotate(B->speed, -PI/2) : B->speed;
 
-    Vector2 current_speed = (Vector2)ball->speed;
+    PlayerBallCollision(P1);
+    PlayerBallCollision(AI);
 
-    /* When ball pos is at screen borders */
-    if ( ball->box.x + 10 == (float)GetScreenWidth() ) ball->speed = Vector2Rotate(current_speed, -PI);
-    else if ( ball->box.x == 0 ) ball->speed = Vector2Rotate(ball->speed, -PI);
-
-    /* When ball collisions with any player */
-    if ( CheckCollisionRecs(ball->box, P1->box) || CheckCollisionRecs(ball->box, AI_Player->box) ) {
-        ball->speed = Vector2Rotate( ball->speed, - PI );
+    bool point_p1, point_ai;
+    point_p1 = B->pos.x > (float) GetScreenWidth() ? true : false;
+    point_ai = B->pos.x < 0 ? true : false;
+    if ( point_ai || point_p1 ) {
+        points_ai += point_ai;
+        points_p1 += point_p1;
+        ReallocBall();
     }
 
-    /* When ball goes beyond 0 or ScreenHeight */
-    if ( ball->box.y < 0 || ball->box.y > (float)GetScreenHeight() ) {
-        WaitTime(2);
-        AllToInitialState();
+}
+
+static void PlayerBallCollision ( Player* p ) {
+
+    unsigned char top_bottom, mid_bottom, bottom_bottom;
+    top_bottom = 20;
+    mid_bottom = 60;
+    bottom_bottom = 80;
+
+    Rectangle top, mid, bottom;
+
+    top = (Rectangle) { p->box.x, p->box.y, 10, top_bottom };
+    mid = (Rectangle) { p->box.x, p->box.y + (float)top_bottom, 10, mid_bottom };
+    bottom = (Rectangle) { p->box.x, p->box.y + (float)mid_bottom, 10, bottom_bottom };
+
+    if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, top ) ) {
+        /* Ball goes up */
+    }
+    else if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, mid ) ) {
+        /* Ball goes straight */
+    }
+    else if (CheckCollisionCircleRec( B->pos, BALL_SIZE, bottom ) ) {
+        /* Ball goes down */
     }
 
 }
-
-void DrawBall(void) { if (ball != (Ball *)NULL) DrawRectangleRec(ball->box, ball->c); }
-
-void MoveBall(void) {
-    ChangeDirection();
-    ball->box.x += ball->speed.x;
-    ball->box.y += ball->speed.y;
-}
-
-void DeleteBall(void) {
-    if (ball != NULL) {
-        ball->c = (Color){};
-        ball->box = (Rectangle){};
-        ball->speed = (Vector2){};
-        free((void *)ball);
-        ball = NULL;
-    }
-}
-
-void ReturnToCenter (void) {
-    ball->box.x = (float)(GetScreenWidth() + 10) / 2;
-    ball->box.y = (float)(GetScreenHeight() + 10)/2;
-}
-
-/* --------------------------- */
-
-/* Player Implementations */
-Player *InitPlayer(Vector2 pos) {
-    Player *p = (Player *) malloc(sizeof(Player));
-    p->box = (Rectangle){pos.x, pos.y, 50, 10};
-    p->c = (Color)RAYWHITE;
-    return p;
-}
-
-void MovePlayer(Player *p) {
-    if (p != NULL) {
-        if ( IsKeyDown(KEY_LEFT) && p->box.x > 0 ) p->box.x -= 20;
-        if ( IsKeyDown(KEY_RIGHT) && p->box.x + 50 < (float) GetScreenWidth() ) p->box.x += 20;
-    }
-}
-
-void DrawPlayer(Player *p) { if (p != NULL) DrawRectangleRec(p->box, p->c); }
-
-void DeletePlayer(Player *p) {
-    if (p != NULL) {
-        p->c = (Color){};
-        p->box = (Rectangle){};
-        free((void *)p);
-    }
-}
-/* -------------------------- */

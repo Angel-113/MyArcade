@@ -25,6 +25,12 @@
 },
 {
   "directory": "/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug",
+  "command": "/usr/bin/cc -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -I/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-src/src -I/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-src/src/external/glfw/include -g -std=gnu2x -fdiagnostics-color=always -o CMakeFiles/ArcadeConsole.dir/src/Arena/Arena.c.o -c /home/angel/CLionProjects/ArcadeConsole/src/Arena/Arena.c",
+  "file": "/home/angel/CLionProjects/ArcadeConsole/src/Arena/Arena.c",
+  "output": "CMakeFiles/ArcadeConsole.dir/src/Arena/Arena.c.o"
+},
+{
+  "directory": "/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug",
   "command": "/usr/bin/cc -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -I/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-src/src -isystem /home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-src/src/external/glfw/include -fno-strict-aliasing -Werror=implicit-function-declaration -Werror=pointer-arith  -g -std=gnu99 -fdiagnostics-color=always -o _deps/raylib-build/raylib/CMakeFiles/raylib.dir/rcore.c.o -c /home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-src/src/rcore.c",
   "file": "/home/angel/CLionProjects/ArcadeConsole/cmake-build-debug/_deps/raylib-src/src/rcore.c",
   "output": "_deps/raylib-build/raylib/CMakeFiles/raylib.dir/rcore.c.o"
