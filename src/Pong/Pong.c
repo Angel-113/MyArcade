@@ -9,13 +9,8 @@ static Player* P1 = NULL;
 static Player* AI = NULL;
 static Ball* B = NULL;
 
-static Vector2 Pd = {0};
-static Vector2 AId = {0};
-
 static unsigned char points_p1 = 0;
 static unsigned char points_ai = 0;
-
-static float deltaTime = 0;
 
 static void InitGame ( void );
 static void UpdateGame ( void );
@@ -26,13 +21,16 @@ static void ReallocBall ( void );
 static void MoveBall ( void );
 static void BallCollision ( void );
 
+static void MovePlayer ( void );
+static void MoveAI ( void );
+
 static void PlayerBallCollision ( Player *p );
 
 void MainPong ( void ) {
     InitGame();
     while ( !WindowShouldClose() ) {
-        UpdateGame();
         DrawGame();
+        UpdateGame();
     }
     CloseGame();
 }
@@ -76,6 +74,8 @@ static void InitGame ( void ) {
 }
 
 static void UpdateGame ( void ) {
+    MovePlayer();
+    MoveAI();
     MoveBall();
     BallCollision();
 }
@@ -109,7 +109,13 @@ static void CloseGame ( void ) {
     points_p1 = 0;
 }
 
-static void ReallocBall ( void ) { B->pos = (Vector2) { (float)GetScreenWidth()/2, (float)GetScreenHeight()/2 }; }
+static void ReallocBall ( void ) {
+    *B = (Ball) {
+            (Vector2) { (float) GetScreenWidth()/2 , (float) GetScreenHeight()/2  },
+            (Vector2) { GetRandomValue(0, 1) == 0 ? -10 : 10, 0 },
+            RAYWHITE
+    };
+}
 
 static void MoveBall ( void ) {
     B->pos.x += B->speed.x;
@@ -137,7 +143,7 @@ static void BallCollision ( void ) {
     top = (Rectangle) { 0, 1, (float)GetScreenWidth(), 1 };
     bottom = (Rectangle) { 0, (float)GetScreenHeight(), (float)GetScreenWidth(), 1 };
 
-    B->speed =  CheckCollisionCircleRec(B->pos, BALL_SIZE, top) || CheckCollisionCircleRec(B->pos, BALL_SIZE, bottom) ? Vector2Rotate(B->speed, -PI/2) : B->speed;
+    B->speed =  CheckCollisionCircleRec(B->pos, BALL_SIZE, top) || CheckCollisionCircleRec(B->pos, BALL_SIZE, bottom) ? Vector2Rotate(B->speed, -PI/4) : B->speed;
 
     PlayerBallCollision(P1);
     PlayerBallCollision(AI);
@@ -146,8 +152,8 @@ static void BallCollision ( void ) {
     point_p1 = B->pos.x > (float) GetScreenWidth() ? true : false;
     point_ai = B->pos.x < 0 ? true : false;
     if ( point_ai || point_p1 ) {
-        points_ai += point_ai;
-        points_p1 += point_p1;
+        points_ai += points_ai < UINT8_MAX ? point_ai : 0;
+        points_p1 += points_p1 < UINT8_MAX ? point_p1 : 0;
         ReallocBall();
     }
 
@@ -155,25 +161,30 @@ static void BallCollision ( void ) {
 
 static void PlayerBallCollision ( Player* p ) {
 
-    unsigned char top_bottom, mid_bottom, bottom_bottom;
+    unsigned char top_bottom, mid_bottom;
     top_bottom = 20;
     mid_bottom = 60;
-    bottom_bottom = 80;
 
     Rectangle top, mid, bottom;
 
-    top = (Rectangle) { p->box.x, p->box.y, 10, top_bottom };
-    mid = (Rectangle) { p->box.x, p->box.y + (float)top_bottom, 10, mid_bottom };
-    bottom = (Rectangle) { p->box.x, p->box.y + (float)mid_bottom, 10, bottom_bottom };
+    top = (Rectangle) { p->box.x, p->box.y, 10, 20 };
+    mid = (Rectangle) { p->box.x, p->box.y + (float)top_bottom, 10, 40 };
+    bottom = (Rectangle) { p->box.x, p->box.y + (float)mid_bottom, 10, 20 };
 
-    if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, top ) ) {
-        /* Ball goes up */
-    }
-    else if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, mid ) ) {
-        /* Ball goes straight */
-    }
-    else if (CheckCollisionCircleRec( B->pos, BALL_SIZE, bottom ) ) {
-        /* Ball goes down */
-    }
+    if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, top ) ) /* Ball goes up */
+        B->speed = (Vector2) { -B->speed.x, -2 };
+    else if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, mid ) ) /* Ball goes straight */
+        B->speed.x = -B->speed.x;
+    else if (CheckCollisionCircleRec( B->pos, BALL_SIZE, bottom ) ) /* Ball goes down */
+        B->speed = (Vector2) { -B->speed.x, +2 };
 
 }
+
+static void MovePlayer ( void ) {
+    if ( IsKeyDown(KEY_DOWN) && P1->box.y + 80 < (float)GetScreenHeight() )
+        P1->box.y += 10;
+    else if ( IsKeyDown(KEY_UP) && P1->box.y > 0 )
+        P1->box.y -= 10;
+}
+
+static void MoveAI ( void ) { AI->box.y = 0.9f * B->pos.y - 0.9f * 40; }
