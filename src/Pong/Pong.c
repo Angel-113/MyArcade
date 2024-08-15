@@ -9,6 +9,7 @@ static Player* P1 = NULL;
 static Player* AI = NULL;
 static Ball* B = NULL;
 
+static double deltaTime = 0;
 static unsigned char points_p1 = 0;
 static unsigned char points_ai = 0;
 
@@ -139,11 +140,8 @@ static void MoveBall ( void ) {
 
 static void BallCollision ( void ) {
 
-    Rectangle top, bottom;
-    top = (Rectangle) { 0, 1, (float)GetScreenWidth(), 1 };
-    bottom = (Rectangle) { 0, (float)GetScreenHeight(), (float)GetScreenWidth(), 1 };
-
-    B->speed =  CheckCollisionCircleRec(B->pos, BALL_SIZE, top) || CheckCollisionCircleRec(B->pos, BALL_SIZE, bottom) ? Vector2Rotate(B->speed, -PI/4) : B->speed;
+     B->speed.y = (float)GetScreenHeight() - (B->pos.y + BALL_SIZE) < BALL_SIZE || B->pos.y + BALL_SIZE < BALL_SIZE ?
+             -B->speed.y : B->speed.y;
 
     PlayerBallCollision(P1);
     PlayerBallCollision(AI);
@@ -167,9 +165,9 @@ static void PlayerBallCollision ( Player* p ) {
 
     Rectangle top, mid, bottom;
 
-    top = (Rectangle) { p->box.x, p->box.y, 10, 20 };
-    mid = (Rectangle) { p->box.x, p->box.y + (float)top_bottom, 10, 40 };
-    bottom = (Rectangle) { p->box.x, p->box.y + (float)mid_bottom, 10, 20 };
+    top = (Rectangle) { p->box.x + 10, p->box.y, 1, 20 };
+    mid = (Rectangle) { p->box.x + 10, p->box.y + (float)top_bottom, 1, 40 };
+    bottom = (Rectangle) { p->box.x + 10, p->box.y + (float)mid_bottom, 1, 20 };
 
     if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, top ) ) /* Ball goes up */
         B->speed = (Vector2) { -B->speed.x, -2 };
@@ -187,4 +185,4 @@ static void MovePlayer ( void ) {
         P1->box.y -= 10;
 }
 
-static void MoveAI ( void ) { AI->box.y = 0.9f * B->pos.y - 0.9f * 40; }
+static void MoveAI ( void ) { AI->box.y = 0.95f * (B->pos.y - 40); }
