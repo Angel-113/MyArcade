@@ -160,21 +160,21 @@ static void BallCollision ( void ) {
 static void PlayerBallCollision ( Player* p ) {
 
     unsigned char top_bottom, mid_bottom;
-    top_bottom = 20;
-    mid_bottom = 60;
+    top_bottom = 30;
+    mid_bottom = 50;
 
     Rectangle top, mid, bottom;
 
-    top = (Rectangle) { p->box.x + 10, p->box.y, 1, 20 };
-    mid = (Rectangle) { p->box.x + 10, p->box.y + (float)top_bottom, 1, 40 };
-    bottom = (Rectangle) { p->box.x + 10, p->box.y + (float)mid_bottom, 1, 20 };
+    top = (Rectangle) { p->box.x + 10, p->box.y, 1, 30 };
+    mid = (Rectangle) { p->box.x + 10, p->box.y + (float)top_bottom, 1, 20 };
+    bottom = (Rectangle) { p->box.x + 10, p->box.y + (float)mid_bottom, 1, 30 };
 
     if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, top ) ) /* Ball goes up */
-        B->speed = (Vector2) { -B->speed.x, -2 };
+        B->speed = (Vector2) { -B->speed.x, -4 };
     else if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, mid ) ) /* Ball goes straight */
-        B->speed.x = -B->speed.x;
+        B->speed.x = -B->speed.x, 0;
     else if (CheckCollisionCircleRec( B->pos, BALL_SIZE, bottom ) ) /* Ball goes down */
-        B->speed = (Vector2) { -B->speed.x, +2 };
+        B->speed = (Vector2) { -B->speed.x, +4 };
 
 }
 
@@ -185,4 +185,4 @@ static void MovePlayer ( void ) {
         P1->box.y -= 10;
 }
 
-static void MoveAI ( void ) { AI->box.y = 0.95f * (B->pos.y - 40); }
+static void MoveAI ( void ) { AI->box.y = 0.85f * (B->pos.y) ; }

@@ -6,16 +6,11 @@
 #define ARCADECONSOLE_CONWAY_H
 
 #include "raylib.h"
+#include "../Arena/Arena.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-
-typedef struct Cell {
-    Rectangle box;
-    Color c;
-    bool state;
-} Cell;
 
 extern void MainConway( void ); /* Main function for conway's game of life */
 

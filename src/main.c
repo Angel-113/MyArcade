@@ -44,7 +44,7 @@ static void ChooseGame(void) { /* Commented by now ( 04/08/2024 ) while see how 
     Vector2 Mouse = (Vector2) GetMousePosition();
     if (CheckCollisionPointRec(Mouse, Buttons[0]) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) MainSnake();
     else if (CheckCollisionPointRec(Mouse, Buttons[1]) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) MainPong();
-    //else if (CheckCollisionPointRec(Mouse, Buttons[2]) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) MainConway();
+    else if (CheckCollisionPointRec(Mouse, Buttons[2]) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) MainConway();
 }
 
 static void DrawMainGame(void) {
