@@ -8,7 +8,6 @@ This project is an arcade console which includes the following games:
 
 ### What you need? ... I guess ...
 
-- These games are build with Raylib's basic functions 
 - You need to install Raylib Version 5.0 to make this project work. 
 - It's also developed under Ubuntu 22.04.4 LTS.
 
@@ -19,7 +18,6 @@ Snake is a classic arcade game where the player controls a growing snake, naviga
 ### Pong
 
 Pong is one of the earliest arcade games and a timeless classic in the gaming world. It simulates table tennis where two players control paddles on opposite sides of the screen, attempting to hit a bouncing ball back and forth. The objective is to score points by getting the ball past the opponent's paddle. The game is simple yet highly competitive, requiring quick reflexes and precise timing.
-Conway's Game of Life
 
 ### Game of Life
 
