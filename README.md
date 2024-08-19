@@ -6,16 +6,16 @@ This project is an arcade console which includes the following games:
 - Pong
 - Conway's Game of Life
 
-### What you need? ... I guess ...
+# # # What do you need?
 
 - You need to install Raylib Version 5.0 to make this project work. 
-- It's also developed under Ubuntu 22.04.4 LTS.
+- A Linux operating system.
 
 ### Snake
 
 Snake is a classic arcade game where the player controls a growing snake,
 navigating it around the screen to collect food while avoiding collisions
-with walls and its own tail. Each piece of food eaten causes the snake to
+with walls and its tail. Each piece of food eaten causes the snake to
 grow longer, increasing the challenge as the game progresses. The goal is
 to achieve the highest possible score before the snake runs out of space 
 or collides with itself.
@@ -32,7 +32,7 @@ The game is simple yet highly competitive, requiring quick reflexes and precise 
 
 Conway's Game of Life is not a game in the traditional sense but a cellular 
 automaton devised by mathematician John Conway. It consists of a grid of 
-cells that evolve through generations based on a set of simple rules: cells
+cells that evolve through generations based on simple rules: cells
 can live, die, or multiply depending on the number of neighboring cells.
 Despite its simplicity, the game creates complex and often beautiful patterns,
-illustrating principles of emergence and self-organization in systems.
+illustrating systems' emergence and self-organization principles.
