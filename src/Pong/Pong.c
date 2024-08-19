@@ -9,7 +9,7 @@ static Player* P1 = NULL;
 static Player* AI = NULL;
 static Ball* B = NULL;
 
-static double deltaTime = 0;
+static float extra_force = 1.0f;
 static unsigned char points_p1 = 0;
 static unsigned char points_ai = 0;
 
@@ -90,8 +90,8 @@ static void DrawGame ( void ) {
 
     ClearBackground(BLACK);
 
-    DrawText(txt1, MeasureText(txt1, 30), 40, 30, GRAY);
-    DrawText(txt2, GetScreenWidth() - 2*MeasureText(txt2, 30), 40, 30, GRAY);
+    DrawText(txt1, GetScreenWidth()/2 - 3*MeasureText(txt1, 30), 40, 30, GRAY);
+    DrawText(txt2, GetScreenWidth()/2 + 2*MeasureText(txt2, 30), 40, 30, GRAY);
     DrawLine(GetScreenWidth()/2, 0, GetScreenWidth()/2, GetScreenHeight(), GRAY);
     DrawCircle((int)B->pos.x, (int)B->pos.y, BALL_SIZE, B->c);
     DrawRectangleRec(P1->box, P1->c);
@@ -119,7 +119,7 @@ static void ReallocBall ( void ) {
 }
 
 static void MoveBall ( void ) {
-    B->pos.x += B->speed.x;
+    B->pos.x += extra_force * B->speed.x;
     B->pos.y += B->speed.y;
 }
 
@@ -150,6 +150,7 @@ static void BallCollision ( void ) {
     point_p1 = B->pos.x > (float) GetScreenWidth() ? true : false;
     point_ai = B->pos.x < 0 ? true : false;
     if ( point_ai || point_p1 ) {
+        extra_force = 1.0f;
         points_ai += points_ai < UINT8_MAX ? point_ai : 0;
         points_p1 += points_p1 < UINT8_MAX ? point_p1 : 0;
         ReallocBall();
@@ -159,22 +160,20 @@ static void BallCollision ( void ) {
 
 static void PlayerBallCollision ( Player* p ) {
 
-    unsigned char top_bottom, mid_bottom;
-    top_bottom = 30;
-    mid_bottom = 50;
-
     Rectangle top, mid, bottom;
 
-    top = (Rectangle) { p->box.x + 10, p->box.y, 1, 30 };
-    mid = (Rectangle) { p->box.x + 10, p->box.y + (float)top_bottom, 1, 20 };
-    bottom = (Rectangle) { p->box.x + 10, p->box.y + (float)mid_bottom, 1, 30 };
+    top = (Rectangle) { p->box.x + (float)(p == AI ? -10 : +20), p->box.y, 1, 30 };
+    mid = (Rectangle) { p->box.x + (float)(p == AI ? -10 : +20), p->box.y + 30, 1, 20 };
+    bottom = (Rectangle) { p->box.x + (float)(p == AI ? -10 : +20), p->box.y + 50, 1, 30 };
 
     if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, top ) ) /* Ball goes up */
-        B->speed = (Vector2) { -B->speed.x, -4 };
-    else if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, mid ) ) /* Ball goes straight */
-        B->speed.x = -B->speed.x, 0;
+        B->speed = (Vector2) { -B->speed.x, -5 };
+    else if ( CheckCollisionCircleRec( B->pos, BALL_SIZE, mid ) ) { /* Ball goes straight */
+        B->speed = (Vector2) {-B->speed.x, 0};
+        extra_force += extra_force < 2.5f ? 0.1f : 0;
+    }
     else if (CheckCollisionCircleRec( B->pos, BALL_SIZE, bottom ) ) /* Ball goes down */
-        B->speed = (Vector2) { -B->speed.x, +4 };
+        B->speed = (Vector2) { -B->speed.x, +5 };
 
 }
 
@@ -185,4 +184,5 @@ static void MovePlayer ( void ) {
         P1->box.y -= 10;
 }
 
-static void MoveAI ( void ) { AI->box.y = 0.85f * (B->pos.y) ; }
+/* Still gotta work on AI movement when B->pos.y ----> GetScreenHeight() */
+static void MoveAI ( void ) { AI->box.y = B->pos.y + 80 < (float)GetScreenHeight() ? 0.95f * B->pos.y : AI->box.y + ((float)GetScreenHeight() - B->pos.y); }
