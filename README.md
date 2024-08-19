@@ -6,7 +6,7 @@ This project is an arcade console which includes the following games:
 - Pong
 - Conway's Game of Life
 
-# # # What do you need?
+### What do you need?
 
 - You need to install Raylib Version 5.0 to make this project work. 
 - A Linux operating system.
