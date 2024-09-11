@@ -36,3 +36,5 @@ cells that evolve through generations based on simple rules: cells
 can live, die, or multiply depending on the number of neighboring cells.
 Despite its simplicity, the game creates complex and often beautiful patterns,
 illustrating systems' emergence and self-organization principles.
+
+*Project is not finished*
